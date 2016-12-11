@@ -1,0 +1,7 @@
+package: github.com/ymyzk/wpcom-stats-proxy
+import:
+- package: github.com/gorilla/mux
+  version: v1.1
+- package: github.com/kelseyhightower/envconfig
+  version: 5c008110b20b657eb7e005b83d0a5f6aa6bb5f4b
+- package: golang.org/x/oauth2
