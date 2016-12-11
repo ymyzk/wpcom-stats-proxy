@@ -32,15 +32,22 @@ func NewClient(conf *Configuration) *Client {
 	}
 }
 
-func (c *Client) getPostStats(stats *wordpressPostStats, id int) error {
+func (c *Client) getPostStats(id int) (*wordpressPostStats, error) {
 	url := fmt.Sprintf("https://public-api.wordpress.com/rest/v1.1/sites/%s/stats/post/%d", c.config.Site, id)
-	res, _ := c.HTTPClient.Get(url)
+	res, err := c.HTTPClient.Get(url)
 	defer res.Body.Close()
+	if err != nil {
+		return nil, err
+	}
 
 	if res.StatusCode != 200 {
 		// TODO: Better error handling
-		return errors.New(fmt.Sprintf("request failed with status code: %d", res.StatusCode))
+		return nil, errors.New(fmt.Sprintf("request failed with status code: %d", res.StatusCode))
 	}
 
-	return json.NewDecoder(res.Body).Decode(&stats)
+	var stats wordpressPostStats
+	if err := json.NewDecoder(res.Body).Decode(&stats); err != nil {
+		return nil, err
+	}
+	return &stats, nil
 }

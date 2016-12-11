@@ -34,8 +34,7 @@ func (s *Server) postStatsHandler(w http.ResponseWriter, req *http.Request) {
 
 	s.logger.Println("request:", req.URL)
 
-	stats := wordpressPostStats{}
-	err = s.client.getPostStats(&stats, id)
+	stats, err := s.client.getPostStats(id)
 	if err != nil {
 		// TODO: Better error handling
 		s.logger.Println("error:", err)
