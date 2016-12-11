@@ -4,4 +4,5 @@ import:
   version: v1.1
 - package: github.com/kelseyhightower/envconfig
   version: 5c008110b20b657eb7e005b83d0a5f6aa6bb5f4b
+- package: github.com/patrickmn/go-cache
 - package: golang.org/x/oauth2

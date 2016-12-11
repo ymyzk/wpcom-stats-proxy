@@ -6,11 +6,14 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/patrickmn/go-cache"
 )
 
 type Server struct {
+	cache  *cache.Cache
 	client *Client
 	config *Configuration
 	logger *log.Logger
@@ -18,6 +21,7 @@ type Server struct {
 
 func NewServer(conf *Configuration, logger *log.Logger) *Server {
 	return &Server{
+		cache:  cache.New(5*time.Minute, 30*time.Second),
 		client: NewClient(conf),
 		config: conf,
 		logger: logger,
@@ -34,13 +38,24 @@ func (s *Server) postStatsHandler(w http.ResponseWriter, req *http.Request) {
 
 	s.logger.Println("request:", req.URL)
 
-	stats, err := s.client.getPostStats(id)
-	if err != nil {
-		// TODO: Better error handling
-		s.logger.Println("error:", err)
-		w.WriteHeader(404)
-		json.NewEncoder(w).Encode(struct{}{})
-		return
+	var stats *wordpressPostStats
+	key := fmt.Sprintf("stats/post/%d", id)
+	cachedStats, found := s.cache.Get(key)
+
+	if found {
+		s.logger.Println("cache hit")
+		stats = cachedStats.(*wordpressPostStats)
+	} else {
+		s.logger.Println("cache missed")
+		stats, err = s.client.getPostStats(id)
+		if err != nil {
+			// TODO: Better error handling
+			s.logger.Println("error:", err)
+			w.WriteHeader(404)
+			json.NewEncoder(w).Encode(struct{}{})
+			return
+		}
+		s.cache.Set(key, stats, cache.DefaultExpiration)
 	}
 
 	s.logger.Println("views:", stats.Views)
