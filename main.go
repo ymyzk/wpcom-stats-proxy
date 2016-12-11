@@ -1,6 +1,9 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -21,10 +24,11 @@ type wordpressPostStats struct {
 
 func main() {
 	var conf Configuration
+	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile)
 	err := envconfig.Process("WPCOM_STATS_PROXY", &conf)
 	if err != nil {
 		panic(err)
 	}
-	s := NewServer(&conf)
+	s := NewServer(&conf, logger)
 	s.start()
 }

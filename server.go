@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -12,12 +13,14 @@ import (
 type Server struct {
 	client *Client
 	config *Configuration
+	logger *log.Logger
 }
 
-func NewServer(conf *Configuration) *Server {
+func NewServer(conf *Configuration, logger *log.Logger) *Server {
 	return &Server{
 		client: NewClient(conf),
 		config: conf,
+		logger: logger,
 	}
 }
 
@@ -29,14 +32,19 @@ func (s *Server) postStatsHandler(w http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 
+	s.logger.Println("request:", req.URL)
+
 	stats := wordpressPostStats{}
 	err = s.client.getPostStats(&stats, id)
 	if err != nil {
 		// TODO: Better error handling
+		s.logger.Println("error:", err)
 		w.WriteHeader(404)
 		json.NewEncoder(w).Encode(struct{}{})
 		return
 	}
+
+	s.logger.Println("views:", stats.Views)
 
 	json.NewEncoder(w).Encode(stats)
 }
