@@ -44,9 +44,11 @@ func (s *Server) postStatsHandler(w http.ResponseWriter, req *http.Request) {
 
 	if found {
 		s.logger.Println("cache hit")
+		w.Header().Set("X-Cache", "hit")
 		stats = cachedStats.(*wordpressPostStats)
 	} else {
 		s.logger.Println("cache missed")
+		w.Header().Set("X-Cache", "miss")
 		stats, err = s.client.getPostStats(id)
 		if err != nil {
 			// TODO: Better error handling
