@@ -40,9 +40,8 @@ func (s *Server) postStatsHandler(w http.ResponseWriter, req *http.Request) {
 
 	var stats *wordpressPostStats
 	key := fmt.Sprintf("stats/post/%d", id)
-	cachedStats, found := s.cache.Get(key)
 
-	if found {
+	if cachedStats, found := s.cache.Get(key); found {
 		s.logger.Println("cache hit")
 		w.Header().Set("X-Cache", "hit")
 		stats = cachedStats.(*wordpressPostStats)
