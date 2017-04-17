@@ -71,5 +71,8 @@ func (s *Server) start() {
 	http.Handle("/", r)
 	addr := fmt.Sprintf("%s:%d", s.config.Host, s.config.Port)
 	fmt.Printf("Listening on %s\n", addr)
-	http.ListenAndServe(addr, nil)
+	err := http.ListenAndServe(addr, nil)
+	if err != nil {
+		panic(err)
+	}
 }
